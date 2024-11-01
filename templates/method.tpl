@@ -1,0 +1,3 @@
+{{ $methodBodyTpl := .MethodBodyTpl }}{{ $typ := .Type }}{{ $method := .Method }}func ({{ $typ.Receiver }} *{{ $typ.Name }}) {{ $method.Name.Value }}({{ range $paramIndex, $param := $method.Parameters.List }}{{ $param.Name }} {{ .Type.String }}{{ if (isLast $paramIndex $method.Parameters.List) }}{{ else }}, {{ end }}{{ end }}) {{ if isMany $method.Results.List }}({{ end }}{{ range $resultIndex, $result := $method.Results.List }}{{ if ne $result.Name "" }}{{ $result.Name }} {{ end }}{{ $result.Type.String }}{{ if (isLast $resultIndex $method.Results.List) }}{{ else }}, {{ end }}{{ end }}{{ if isMany $method.Results.List }}){{ end }} {
+{{ include $methodBodyTpl "Type" $typ "Method" $method }}
+}

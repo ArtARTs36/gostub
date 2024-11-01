@@ -1,0 +1,1 @@
+    panic("method {{ .Type.Name }}.{{ .Method.Name.Value }} not implemented")
