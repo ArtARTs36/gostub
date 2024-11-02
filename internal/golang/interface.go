@@ -12,29 +12,37 @@ import (
 type GoInterface struct {
 	Name         ds.String
 	Imports      []GoImport
-	Package      string
+	Package      Package
 	Methods      []*GoMethod
 	UsedPackages *ds.Set[string]
 }
 
-func ParseInterfacesFromSource(src []byte, needInterfaces []string) ([]*GoInterface, error) {
+type ParseInterfacesParams struct {
+	Source      []byte
+	FilterNames []string
+	GoModule    string
+}
+
+func ParseInterfacesFromSource(params ParseInterfacesParams) ([]*GoInterface, error) {
 	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, "demo", src, parser.ParseComments)
+	file, err := parser.ParseFile(fset, "demo", params.Source, parser.ParseComments)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse file: %w", err)
 	}
 
-	pkg := file.Name.String()
+	pkg := Package{
+		Name: file.Name.String(),
+	}
 
 	imports := make([]GoImport, 0)
 
 	needInterfacesSet := map[string]bool{}
-	for _, needInterface := range needInterfaces {
+	for _, needInterface := range params.FilterNames {
 		needInterfacesSet[needInterface] = true
 	}
 
 	isNeed := func(interfaceName string) bool {
-		if len(needInterfaces) == 0 {
+		if len(params.FilterNames) == 0 {
 			return true
 		}
 

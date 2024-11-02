@@ -20,10 +20,12 @@ type CollectParams struct {
 	MethodPerFile bool
 
 	MethodBodyTpl string
+
+	TargetPackage string
 }
 
 func (c *Collector) Collect(params *CollectParams, nameGenerator *renderer.NameGenerator) ([]*Stub, error) {
-	types, err := c.collectTypes(params.GoInterfaces, nameGenerator)
+	types, err := c.collectTypes(params, nameGenerator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to collect types: %w", err)
 	}
@@ -34,10 +36,15 @@ func (c *Collector) Collect(params *CollectParams, nameGenerator *renderer.NameG
 			return nil, err
 		}
 
+		pkg := params.TargetPackage
+		if pkg == "" {
+			pkg = types[0].Package
+		}
+
 		return []*Stub{
 			{
 				Filename:      filename,
-				Package:       types[0].Package,
+				Package:       pkg,
 				Imports:       types[0].Imports,
 				Types:         types,
 				GenMethods:    true,
@@ -122,12 +129,12 @@ func (c *Collector) Collect(params *CollectParams, nameGenerator *renderer.NameG
 }
 
 func (c *Collector) collectTypes(
-	interfaces []*golang.GoInterface,
+	params *CollectParams,
 	nameGenerator *renderer.NameGenerator,
 ) ([]golang.Type, error) {
-	types := make([]golang.Type, 0, len(interfaces))
+	types := make([]golang.Type, 0, len(params.GoInterfaces))
 
-	for _, goInterface := range interfaces {
+	for _, goInterface := range params.GoInterfaces {
 		nameWords := camelcase.Split(goInterface.Name.Value)
 
 		typeName, err := nameGenerator.GenerateTypeName(goInterface)
@@ -138,7 +145,7 @@ func (c *Collector) collectTypes(
 		types = append(types, golang.Type{
 			Name:      typeName,
 			Imports:   goInterface.Imports,
-			Package:   goInterface.Package,
+			Package:   goInterface.Package.Name,
 			Receiver:  strings.ToLower(string(nameWords[len(nameWords)-1][0])),
 			Methods:   goInterface.Methods,
 			Interface: goInterface,

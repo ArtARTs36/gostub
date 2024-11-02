@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/gomodfinder"
 	"github.com/artarts36/gostub/internal/cmd"
 	"github.com/artarts36/gostub/internal/renderer"
 	cli "github.com/artarts36/singlecli"
+	"golang.org/x/mod/modfile"
+	"path/filepath"
 	"strings"
 )
 
@@ -75,6 +78,14 @@ func main() {
 				Name:      "interfaces",
 				WithValue: true,
 			},
+			{
+				Name:      "source-go-module",
+				WithValue: true,
+			},
+			{
+				Name:      "target-go-module",
+				WithValue: true,
+			},
 		},
 		Action: run,
 	}
@@ -119,6 +130,24 @@ func run(ctx *cli.Context) error {
 		}
 	}
 
+	sourceGoModule := ctx.Opts["source-go-module"]
+	if sourceGoModule == "" {
+		goMod, err := findGoModule(filepath.Dir(ctx.GetArg("source")))
+		if err != nil {
+			return err
+		}
+		sourceGoModule = goMod.Module.Mod.Path
+	}
+
+	targetGoModule := ctx.Opts["target-go-module"]
+	if targetGoModule == "" {
+		goMod, err := findCurrentGoModule()
+		if err != nil {
+			return err
+		}
+		targetGoModule = goMod.Module.Mod.Path
+	}
+
 	return command.Run(ctx.Context, &cmd.Params{
 		Source: ctx.GetArg("source"),
 
@@ -138,5 +167,20 @@ func run(ctx *cli.Context) error {
 		Out:        ctx.Opts["out"],
 		Interfaces: interfaces,
 		SkipExists: ctx.HasOpt("skip-exists"),
+
+		SourceGoModule: sourceGoModule,
+		TargetGoModule: targetGoModule,
 	})
+}
+
+func findCurrentGoModule() (*modfile.File, error) {
+	return findGoModule("./")
+}
+
+func findGoModule(dir string) (*modfile.File, error) {
+	goMod, err := gomodfinder.Find(dir, 10)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find go.mod file: %w", err)
+	}
+	return goMod, nil
 }

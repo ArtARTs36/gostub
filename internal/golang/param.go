@@ -23,7 +23,6 @@ type GoParameterType struct {
 	Pointer bool
 	Name    string
 
-	Package      string
 	UsedPackages *ds.Set[string]
 
 	ValueThroughNil bool
@@ -48,7 +47,7 @@ func (t *GoParameterType) calcStubInstantiateExpr(methodName string) {
 			return "nil"
 		}
 
-		if t.Package == "" {
+		if !t.UsedPackages.Valid() {
 			if t.Name == "error" {
 				return template.HTML(fmt.Sprintf(`fmt.Errorf("is not real method %s")`, methodName))
 			} else if t.Name == "any" || t.Name == "interface" {
