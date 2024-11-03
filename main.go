@@ -7,7 +7,7 @@ import (
 	"github.com/artarts36/gostub/internal/cmd"
 	"github.com/artarts36/gostub/internal/renderer"
 	cli "github.com/artarts36/singlecli"
-	"golang.org/x/mod/modfile"
+	"log/slog"
 	"path/filepath"
 	"strings"
 )
@@ -136,6 +136,9 @@ func run(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
+
+		slog.InfoContext(ctx.Context, "[main] source go.mod found", slog.String("go_mod", goMod.Path))
+
 		sourceGoModule = goMod.Module.Mod.Path
 	}
 
@@ -145,6 +148,9 @@ func run(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
+
+		slog.InfoContext(ctx.Context, "[main] target go.mod found", slog.String("go_mod", goMod.Path))
+
 		targetGoModule = goMod.Module.Mod.Path
 	}
 
@@ -173,11 +179,11 @@ func run(ctx *cli.Context) error {
 	})
 }
 
-func findCurrentGoModule() (*modfile.File, error) {
+func findCurrentGoModule() (*gomodfinder.ModFile, error) {
 	return findGoModule("./")
 }
 
-func findGoModule(dir string) (*modfile.File, error) {
+func findGoModule(dir string) (*gomodfinder.ModFile, error) {
 	goMod, err := gomodfinder.Find(dir, 10)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find go.mod file: %w", err)
