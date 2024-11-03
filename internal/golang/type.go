@@ -1,9 +1,11 @@
 package golang
 
+import "github.com/artarts36/gomodfinder"
+
 type Type struct {
 	Name     string
 	Imports  []GoImport
-	Package  string
+	Package  *gomodfinder.Package
 	Receiver string
 	Methods  []*GoMethod
 

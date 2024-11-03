@@ -1,4 +1,4 @@
-{{ $methodBodyTpl := .Stub.MethodBodyTpl }}{{ $types := .Stub.Types }}package {{ .Stub.Package }}{{ if noEmpty .Stub.Imports }}
+{{ $methodBodyTpl := .Stub.MethodBodyTpl }}{{ $types := .Stub.Types }}package {{ .Stub.Package.Name }}{{ if noEmpty .Stub.Imports }}
 
 import ({{ $imports := .Stub.Imports }}{{ range $importIndex, $import := .Stub.Imports }}
     {{ raw $import.String }}{{ if (isLast $importIndex $imports) }}

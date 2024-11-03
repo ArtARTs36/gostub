@@ -2,6 +2,7 @@ package golang
 
 import (
 	"fmt"
+	"github.com/artarts36/gomodfinder"
 	"go/ast"
 
 	"github.com/artarts36/gostub/internal/ds"
@@ -14,7 +15,7 @@ type GoMethod struct {
 	UsedPackages *ds.Set[string]
 }
 
-func ParseMethodFromField(method *ast.Field) (*GoMethod, error) {
+func ParseMethodFromField(method *ast.Field, pkg *gomodfinder.Package) (*GoMethod, error) {
 	goMethod := &GoMethod{
 		Name:         ds.NewString(method.Names[0].Name),
 		UsedPackages: ds.NewSet[string](),
@@ -40,7 +41,7 @@ func ParseMethodFromField(method *ast.Field) (*GoMethod, error) {
 			Name: param.Names[0].Name,
 		}
 
-		goParamType, paramErr := parseParameterType(param.Type)
+		goParamType, paramErr := parseParameterType(param.Type, pkg)
 		if paramErr != nil {
 			return nil, fmt.Errorf(
 				"failed to get type name for %s.%s: %w",
@@ -68,7 +69,7 @@ func ParseMethodFromField(method *ast.Field) (*GoMethod, error) {
 				result.Name = resultNode.Names[0].Name
 			}
 
-			paramType, paramTypeErr := parseParameterType(resultNode.Type)
+			paramType, paramTypeErr := parseParameterType(resultNode.Type, pkg)
 			if paramTypeErr != nil {
 				return nil, fmt.Errorf(
 					"failed to parse result[%d] type for method %q: %w",

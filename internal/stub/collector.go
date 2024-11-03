@@ -2,6 +2,7 @@ package stub
 
 import (
 	"fmt"
+	"github.com/artarts36/gomodfinder"
 	"strings"
 
 	"github.com/fatih/camelcase"
@@ -21,7 +22,7 @@ type CollectParams struct {
 
 	MethodBodyTpl string
 
-	TargetPackage string
+	TargetPackage *gomodfinder.Package
 }
 
 func (c *Collector) Collect(params *CollectParams, nameGenerator *renderer.NameGenerator) ([]*Stub, error) {
@@ -37,7 +38,7 @@ func (c *Collector) Collect(params *CollectParams, nameGenerator *renderer.NameG
 		}
 
 		pkg := params.TargetPackage
-		if pkg == "" {
+		if pkg == nil {
 			pkg = types[0].Package
 		}
 
@@ -142,10 +143,15 @@ func (c *Collector) collectTypes(
 			return nil, fmt.Errorf("failed to generate type name for interface %q: %w", goInterface.Name, err)
 		}
 
+		pkg := goInterface.Package
+		if params.TargetPackage != nil {
+			pkg = params.TargetPackage
+		}
+
 		types = append(types, golang.Type{
 			Name:      typeName,
 			Imports:   goInterface.Imports,
-			Package:   goInterface.Package.Name,
+			Package:   pkg,
 			Receiver:  strings.ToLower(string(nameWords[len(nameWords)-1][0])),
 			Methods:   goInterface.Methods,
 			Interface: goInterface,
@@ -194,9 +200,17 @@ func (c *Collector) collectMethodStubs(
 				}
 			}
 
+			pkg := typ.Package
+			if params.TargetPackage != nil {
+				pkg = params.TargetPackage
+				imports = append(imports, golang.GoImport{
+					Path: fmt.Sprintf("%s/%s", typ.Interface.Package.Module.Module.Mod.Path, typ.Interface.Package.ModuleRelativePath),
+				})
+			}
+
 			stub := &Stub{
 				Filename: stubFilename,
-				Package:  typ.Package,
+				Package:  pkg,
 				Imports:  imports,
 				Types: []golang.Type{
 					cType,

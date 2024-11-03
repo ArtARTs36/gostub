@@ -2,25 +2,28 @@ package golang
 
 import (
 	"fmt"
+	"github.com/artarts36/gomodfinder"
 	"github.com/artarts36/gostub/internal/ds"
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"path/filepath"
 	"strings"
 )
 
 type GoInterface struct {
 	Name         ds.String
 	Imports      []GoImport
-	Package      Package
+	Package      *gomodfinder.Package
 	Methods      []*GoMethod
 	UsedPackages *ds.Set[string]
 }
 
 type ParseInterfacesParams struct {
-	Source      []byte
-	FilterNames []string
-	GoModule    string
+	Source         []byte
+	SourcePath     string
+	FilterNames    []string
+	SourceGoModule *gomodfinder.ModFile
 }
 
 func ParseInterfacesFromSource(params ParseInterfacesParams) ([]*GoInterface, error) {
@@ -30,9 +33,7 @@ func ParseInterfacesFromSource(params ParseInterfacesParams) ([]*GoInterface, er
 		return nil, fmt.Errorf("failed to parse file: %w", err)
 	}
 
-	pkg := Package{
-		Name: file.Name.String(),
-	}
+	pkg := params.SourceGoModule.CalcPackageFromAbsPathWithName(file.Name.String(), filepath.Dir(params.SourcePath))
 
 	imports := make([]GoImport, 0)
 
@@ -92,7 +93,7 @@ func ParseInterfacesFromSource(params ParseInterfacesParams) ([]*GoInterface, er
 		}
 
 		for _, method := range it.Methods.List {
-			goMethod, goMethodErr := ParseMethodFromField(method)
+			goMethod, goMethodErr := ParseMethodFromField(method, pkg)
 			if goMethodErr != nil {
 				inspectErr = fmt.Errorf("failed to parse method for interface %q: %w", goInterface.Name, goMethodErr)
 				return false

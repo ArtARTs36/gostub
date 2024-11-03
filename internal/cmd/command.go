@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/artarts36/gomodfinder"
 	"github.com/artarts36/gostub/internal/golang"
 	"github.com/artarts36/gostub/internal/renderer"
 	st "github.com/artarts36/gostub/internal/stub"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"text/template"
 )
 
@@ -37,8 +39,8 @@ type Params struct {
 	SkipExists bool
 
 	Interfaces     []string
-	SourceGoModule string
-	TargetGoModule string
+	SourceGoModule *gomodfinder.ModFile
+	TargetGoModule *gomodfinder.ModFile
 }
 
 func NewCommand(renderer *renderer.Renderer) *Command {
@@ -116,13 +118,26 @@ func (c *Command) collectStubs(src []byte, params *Params, nameGenerator *render
 		methodBodyTpl = "method_body_panic.tpl"
 	}
 
+	sourceAbsPath, err := filepath.Abs(params.Source)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get absoulte source path: %w", sourceAbsPath)
+	}
+
 	interfaces, err := golang.ParseInterfacesFromSource(golang.ParseInterfacesParams{
-		Source:      src,
-		FilterNames: params.Interfaces,
-		GoModule:    params.SourceGoModule,
+		Source:         src,
+		SourcePath:     sourceAbsPath,
+		FilterNames:    params.Interfaces,
+		SourceGoModule: params.SourceGoModule,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse go interfaces: %w", err)
+	}
+
+	var targetPkg *gomodfinder.Package
+	if params.Package != "" {
+		targetPkg = params.TargetGoModule.Package(params.Package)
+	} else {
+		targetPkg = interfaces[0].Package
 	}
 
 	return c.stubCollector.Collect(&st.CollectParams{
@@ -133,7 +148,7 @@ func (c *Command) collectStubs(src []byte, params *Params, nameGenerator *render
 
 		MethodBodyTpl: methodBodyTpl,
 
-		TargetPackage: params.Package,
+		TargetPackage: targetPkg,
 	}, nameGenerator)
 }
 

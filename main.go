@@ -78,14 +78,6 @@ func main() {
 				Name:      "interfaces",
 				WithValue: true,
 			},
-			{
-				Name:      "source-go-module",
-				WithValue: true,
-			},
-			{
-				Name:      "target-go-module",
-				WithValue: true,
-			},
 		},
 		Action: run,
 	}
@@ -130,29 +122,19 @@ func run(ctx *cli.Context) error {
 		}
 	}
 
-	sourceGoModule := ctx.Opts["source-go-module"]
-	if sourceGoModule == "" {
-		goMod, err := findGoModule(filepath.Dir(ctx.GetArg("source")))
-		if err != nil {
-			return err
-		}
-
-		slog.InfoContext(ctx.Context, "[main] source go.mod found", slog.String("go_mod", goMod.Path))
-
-		sourceGoModule = goMod.Module.Mod.Path
+	sourceGoModule, err := findGoModule(filepath.Dir(ctx.GetArg("source")))
+	if err != nil {
+		return fmt.Errorf("failed to find source go.mod file: %w", err)
 	}
 
-	targetGoModule := ctx.Opts["target-go-module"]
-	if targetGoModule == "" {
-		goMod, err := findCurrentGoModule()
-		if err != nil {
-			return err
-		}
+	slog.InfoContext(ctx.Context, "[main] source go.mod found", slog.String("go_mod", sourceGoModule.Path))
 
-		slog.InfoContext(ctx.Context, "[main] target go.mod found", slog.String("go_mod", goMod.Path))
-
-		targetGoModule = goMod.Module.Mod.Path
+	targetGoModule, err := findCurrentGoModule()
+	if err != nil {
+		return fmt.Errorf("failed to find current go.mod file: %w", err)
 	}
+
+	slog.InfoContext(ctx.Context, "[main] target go.mod found", slog.String("go_mod", targetGoModule.Path))
 
 	return command.Run(ctx.Context, &cmd.Params{
 		Source: ctx.GetArg("source"),

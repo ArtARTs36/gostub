@@ -1,3 +1,13 @@
+github.com/artarts36/gomodfinder v0.0.0-20241103123341-7c08e65eac65 h1:Q7g+2DTDiQZHt0wLtUVfl6fqqtiuik2vsWEvx4yq91U=
+github.com/artarts36/gomodfinder v0.0.0-20241103123341-7c08e65eac65/go.mod h1:SKGqLJWAh+V4i/x4gxvTBS2FjEbw2/xbiN1aoQ2jiVA=
+github.com/artarts36/gomodfinder v0.0.0-20241103175829-9c1025b75a3f h1:EcFQ+aKMP51Iv5xPARBN5l0MKvnVYrrBmoTKsfnrm/Y=
+github.com/artarts36/gomodfinder v0.0.0-20241103175829-9c1025b75a3f/go.mod h1:SKGqLJWAh+V4i/x4gxvTBS2FjEbw2/xbiN1aoQ2jiVA=
+github.com/artarts36/gomodfinder v0.0.0-20241103212741-fc8b18bece71 h1:G236IjA/2QV7aKUarNL4u7xmH/92QNVvlSbbLva5bxU=
+github.com/artarts36/gomodfinder v0.0.0-20241103212741-fc8b18bece71/go.mod h1:SKGqLJWAh+V4i/x4gxvTBS2FjEbw2/xbiN1aoQ2jiVA=
+github.com/artarts36/gomodfinder v0.0.0-20241103215856-a77f283f6846 h1:+XeJqmD6rlSq4y1KDZqum1f1wMcQl0FaVcLypWFlAYc=
+github.com/artarts36/gomodfinder v0.0.0-20241103215856-a77f283f6846/go.mod h1:SKGqLJWAh+V4i/x4gxvTBS2FjEbw2/xbiN1aoQ2jiVA=
+github.com/artarts36/gomodfinder v0.0.0-20241103222015-78fbee75bcfb h1:mjeub/QyV8C30pqlnNp9f7c8P1j/cD2u8cjNNInr9N4=
+github.com/artarts36/gomodfinder v0.0.0-20241103222015-78fbee75bcfb/go.mod h1:SKGqLJWAh+V4i/x4gxvTBS2FjEbw2/xbiN1aoQ2jiVA=
 github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745 h1:uBS2P11cIO92i8J8Mo7jg0TCx4punC3eF6hmeytxVNc=
 github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745/go.mod h1:fHZ8rEyl67LbKgG7bJqhNK7w0sed4GTp83FLu2IMmBU=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=
