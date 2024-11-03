@@ -7,3 +7,7 @@ try:
 	go install ./
 	cd ./examples/rpc-service && make try
 	cd ./examples/rpc-service-2 && make try
+
+.PHONY: lint
+lint:
+	golangci-lint run --fix

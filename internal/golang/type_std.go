@@ -2,6 +2,13 @@ package golang
 
 import "slices"
 
+const (
+	TypeError  = "error"
+	TypeAny    = "any"
+	TypeString = "string"
+	TypeBool   = "bool"
+)
+
 var (
 	stdTypes = []string{
 		"int", "int16", "int32",

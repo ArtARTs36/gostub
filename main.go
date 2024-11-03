@@ -166,7 +166,9 @@ func findCurrentGoModule() (*gomodfinder.ModFile, error) {
 }
 
 func findGoModule(dir string) (*gomodfinder.ModFile, error) {
-	goMod, err := gomodfinder.Find(dir, 10)
+	const findGoModLevels = 10
+
+	goMod, err := gomodfinder.Find(dir, findGoModLevels)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find go.mod file: %w", err)
 	}

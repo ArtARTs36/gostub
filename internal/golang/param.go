@@ -21,7 +21,6 @@ type GoParameter struct {
 }
 
 type GoParameterType struct {
-	Pointer      bool
 	Name         string
 	ExternalName string
 
@@ -56,15 +55,18 @@ func (t *GoParameterType) calcStubInstantiateExpr(methodName string) {
 		if !t.UsedPackages.Valid() {
 			t.UsedPackages.Add("errors")
 
-			if t.Name == "error" {
+			switch t.Name {
+			case TypeError:
 				return template.HTML(fmt.Sprintf(`errors.New("is not real method %s")`, methodName))
-			} else if t.Name == "any" || t.Name == "interface" {
+			case TypeAny, "interface":
 				return "nil"
-			} else if t.Name == "string" {
+			case TypeString:
 				return `""`
-			} else if t.Name == "bool" {
+			case TypeBool:
 				return "false"
-			} else if IsNumericType(t.Name) {
+			}
+
+			if IsNumericType(t.Name) {
 				return "0"
 			}
 		}
@@ -80,23 +82,26 @@ func (t *GoParameterType) calcStubInstantiateExpr(methodName string) {
 	t.Value = calc(methodName)
 }
 
-func parseParameterType(ptNode ast.Node, pkg *gomodfinder.Package) (GoParameterType, error) {
+func calcPtVtn(result GoParameterType, ptNode ast.Node) {
+	if _, ok := ptNode.(*ast.StarExpr); ok {
+		result.ValueThroughNil = true
+	} else if at, atOk := ptNode.(*ast.ArrayType); atOk {
+		if at.Len == nil {
+			result.ValueThroughNil = true
+		}
+	} else if _, itOk := ptNode.(*ast.InterfaceType); itOk {
+		result.ValueThroughNil = true
+	}
+}
+
+func parseParameterType(ptNode ast.Node, pkg *gomodfinder.Package) (GoParameterType, error) { //nolint:funlen,lll // not need
 	result := GoParameterType{
 		Name:         "",
 		UsedPackages: ds.NewSet[string](),
 		Package:      pkg,
 	}
 
-	if _, ok := ptNode.(*ast.StarExpr); ok {
-		result.Pointer = true
-		result.ValueThroughNil = true
-	} else if at, ok := ptNode.(*ast.ArrayType); ok {
-		if at.Len == nil {
-			result.ValueThroughNil = true
-		}
-	} else if _, ok := ptNode.(*ast.InterfaceType); ok {
-		result.ValueThroughNil = true
-	}
+	calcPtVtn(result, ptNode)
 
 	var parse func(node ast.Node) (string, string, error)
 

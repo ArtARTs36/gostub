@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/artarts36/gomodfinder"
@@ -11,7 +10,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"text/template"
 )
 
 type Command struct {
@@ -71,7 +69,7 @@ func (c *Command) Run(ctx context.Context, params *Params) error {
 
 	stubs, err := c.collectStubs(src, params, nameGenerator)
 	if err != nil {
-		return fmt.Errorf("failed to collect stubs: %w", stubs)
+		return fmt.Errorf("failed to collect stubs: %w", err)
 	}
 
 	return c.generate(ctx, stubs, params)
@@ -120,7 +118,7 @@ func (c *Command) collectStubs(src []byte, params *Params, nameGenerator *render
 
 	sourceAbsPath, err := filepath.Abs(params.Source)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get absoulte source path: %w", sourceAbsPath)
+		return nil, fmt.Errorf("failed to get absoulte source path for source %q: %w", sourceAbsPath, err)
 	}
 
 	interfaces, err := golang.ParseInterfacesFromSource(golang.ParseInterfacesParams{
@@ -150,13 +148,4 @@ func (c *Command) collectStubs(src []byte, params *Params, nameGenerator *render
 
 		TargetPackage: targetPkg,
 	}, nameGenerator)
-}
-
-func (c *Command) genFilename(tmpl *template.Template, params map[string]interface{}) (string, error) {
-	buf := &bytes.Buffer{}
-	err := tmpl.Execute(buf, params)
-	if err != nil {
-		return "", err
-	}
-	return buf.String(), err
 }
