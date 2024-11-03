@@ -221,7 +221,7 @@ func (c *Collector) collectMethodStubs(
 			if params.TargetPackage != nil {
 				pkg = params.TargetPackage
 				imports = append(imports, golang.GoImport{
-					Path: fmt.Sprintf("%s/%s", typ.Interface.Package.Module.Module.Mod.Path, typ.Interface.Package.ModuleRelativePath),
+					Path: typ.Interface.Package.FullName(),
 				})
 			}
 

@@ -8,6 +8,8 @@ github.com/artarts36/gomodfinder v0.0.0-20241103215856-a77f283f6846 h1:+XeJqmD6r
 github.com/artarts36/gomodfinder v0.0.0-20241103215856-a77f283f6846/go.mod h1:SKGqLJWAh+V4i/x4gxvTBS2FjEbw2/xbiN1aoQ2jiVA=
 github.com/artarts36/gomodfinder v0.0.0-20241103222015-78fbee75bcfb h1:mjeub/QyV8C30pqlnNp9f7c8P1j/cD2u8cjNNInr9N4=
 github.com/artarts36/gomodfinder v0.0.0-20241103222015-78fbee75bcfb/go.mod h1:SKGqLJWAh+V4i/x4gxvTBS2FjEbw2/xbiN1aoQ2jiVA=
+github.com/artarts36/gomodfinder v0.0.0-20241103230927-68b64e15e35e h1:VSzpk+Dxo8NdMYSUbPbZa+S4ozMtIrd6kRwcAEhOPQs=
+github.com/artarts36/gomodfinder v0.0.0-20241103230927-68b64e15e35e/go.mod h1:SKGqLJWAh+V4i/x4gxvTBS2FjEbw2/xbiN1aoQ2jiVA=
 github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745 h1:uBS2P11cIO92i8J8Mo7jg0TCx4punC3eF6hmeytxVNc=
 github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745/go.mod h1:fHZ8rEyl67LbKgG7bJqhNK7w0sed4GTp83FLu2IMmBU=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=

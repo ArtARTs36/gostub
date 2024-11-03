@@ -3,7 +3,7 @@ module github.com/artarts36/gostub
 go 1.22.8
 
 require (
-	github.com/artarts36/gomodfinder v0.0.0-20241103222015-78fbee75bcfb
+	github.com/artarts36/gomodfinder v0.0.0-20241103230927-68b64e15e35e
 	github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745
 	github.com/fatih/camelcase v1.0.0
 	github.com/iancoleman/strcase v0.3.0
