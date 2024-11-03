@@ -3,10 +3,6 @@ package stub
 import (
 	"fmt"
 	"github.com/artarts36/gomodfinder"
-	"strings"
-
-	"github.com/fatih/camelcase"
-
 	"github.com/artarts36/gostub/internal/golang"
 	"github.com/artarts36/gostub/internal/renderer"
 )
@@ -159,8 +155,6 @@ func (c *Collector) collectTypes(
 	types := make([]golang.Type, 0, len(params.GoInterfaces))
 
 	for _, goInterface := range params.GoInterfaces {
-		nameWords := camelcase.Split(goInterface.Name.Value)
-
 		typeName, err := nameGenerator.GenerateTypeName(goInterface)
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate type name for interface %q: %w", goInterface.Name, err)
@@ -175,7 +169,7 @@ func (c *Collector) collectTypes(
 			Name:      typeName,
 			Imports:   goInterface.Imports,
 			Package:   pkg,
-			Receiver:  strings.ToLower(string(nameWords[len(nameWords)-1][0])),
+			Receiver:  golang.CreateReceiver(goInterface.Name.Value),
 			Methods:   goInterface.Methods,
 			Interface: goInterface,
 		})
