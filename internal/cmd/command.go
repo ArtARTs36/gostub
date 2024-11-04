@@ -111,9 +111,9 @@ func (c *Command) generate(
 }
 
 func (c *Command) collectStubs(src []byte, params *Params, nameGenerator *renderer.NameGenerator) ([]*st.Stub, error) {
-	methodBodyTpl := "method_body_nil_returns.tpl"
+	methodBodyTpl := "method_body_panic.tpl"
 	if params.MethodBody == "panic" {
-		methodBodyTpl = "method_body_panic.tpl"
+		methodBodyTpl = "method_body_nil_returns.tpl"
 	}
 
 	sourceAbsPath, err := filepath.Abs(params.Source)

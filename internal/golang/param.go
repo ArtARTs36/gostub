@@ -29,7 +29,8 @@ type GoParameterType struct {
 	ValueThroughNil bool
 	ValueThroughVar bool
 
-	Value template.HTML
+	Value         template.HTML
+	ExternalValue template.HTML
 
 	Package *gomodfinder.Package
 }
@@ -46,10 +47,17 @@ func (t *GoParameterType) String() string {
 	return t.Name
 }
 
+func (t *GoParameterType) ValueFor(pkg *gomodfinder.Package) template.HTML {
+	if t.Package.Equal(pkg) {
+		return t.Value
+	}
+	return t.ExternalValue
+}
+
 func (t *GoParameterType) calcStubInstantiateExpr(methodName string) {
-	calc := func(methodName string) template.HTML {
+	calc := func(methodName string) (template.HTML, template.HTML) {
 		if t.ValueThroughNil {
-			return "nil"
+			return TypeNil, TypeNil
 		}
 
 		if !t.UsedPackages.Valid() {
@@ -57,29 +65,28 @@ func (t *GoParameterType) calcStubInstantiateExpr(methodName string) {
 
 			switch t.Name {
 			case TypeError:
-				return template.HTML(fmt.Sprintf(`errors.New("is not real method %s")`, methodName))
+				return template.HTML(fmt.Sprintf(`errors.New("is not real method %s")`, methodName)),
+					template.HTML(fmt.Sprintf(`errors.New("is not real method %s")`, methodName))
 			case TypeAny, "interface":
-				return "nil"
+				return TypeNil, TypeNil
 			case TypeString:
-				return `""`
+				return `""`, `""`
 			case TypeBool:
-				return "false"
+				return "false", "false"
 			}
 
 			if IsNumericType(t.Name) {
-				return "0"
+				return "0", "0"
 			}
 		}
 
 		t.ValueThroughVar = true
 
-		return template.HTML(fmt.Sprintf(
-			"anyArg.(%s)",
-			t.String(),
-		))
+		return template.HTML(fmt.Sprintf("anyArg.(%s)", t.Name)),
+			template.HTML(fmt.Sprintf("anyArg.(%s)", t.ExternalName))
 	}
 
-	t.Value = calc(methodName)
+	t.Value, t.ExternalValue = calc(methodName)
 }
 
 func calcPtVtn(result GoParameterType, ptNode ast.Node) {

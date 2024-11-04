@@ -7,6 +7,7 @@ const (
 	TypeAny    = "any"
 	TypeString = "string"
 	TypeBool   = "bool"
+	TypeNil    = "nil"
 )
 
 var (
