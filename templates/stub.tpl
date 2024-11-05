@@ -1,6 +1,6 @@
 {{ $methodBodyTpl := .Stub.MethodBodyTpl }}{{ $types := .Stub.Types }}package {{ .Stub.Package.Name }}{{ if noEmpty .Stub.Imports }}
 
-import ({{ $imports := .Stub.Imports }}{{ range $importIndex, $import := .Stub.Imports }}
+import ({{ $imports := .Stub.Imports }}{{ range $importIndex, $import := .Stub.Imports.SortedImports }}
     {{ raw $import.String }}{{ if (isLast $importIndex $imports) }}
 {{ end }}{{ end }}){{ end }}{{ if .Stub.GenTypes }}
 {{ range $typIndex, $typ := $types }}
