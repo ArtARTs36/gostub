@@ -112,7 +112,7 @@ func (c *Command) generate(
 
 func (c *Command) collectStubs(src []byte, params *Params, nameGenerator *renderer.NameGenerator) ([]*st.Stub, error) {
 	methodBodyTpl := "method_body_panic.tpl"
-	if params.MethodBody == "panic" {
+	if params.MethodBody == "nil-returns" {
 		methodBodyTpl = "method_body_nil_returns.tpl"
 	}
 
