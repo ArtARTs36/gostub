@@ -2,65 +2,73 @@ package golang
 
 import (
 	"fmt"
+	"github.com/artarts36/gds"
+	"github.com/artarts36/goimports"
+	"github.com/artarts36/gomodfinder"
 	"github.com/artarts36/gostub/internal/ds"
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"strings"
+	"path/filepath"
 )
 
 type GoInterface struct {
-	Name         ds.String
-	Imports      []GoImport
-	Package      string
-	Methods      []*GoMethod
-	UsedPackages *ds.Set[string]
+	Name    ds.String
+	Imports *goimports.ImportGroups
+	Package *gomodfinder.Package
+	Methods []*GoMethod
 }
 
-func ParseInterfacesFromSource(src []byte, needInterfaces []string) ([]*GoInterface, error) {
+type ParseInterfacesParams struct {
+	Source         []byte
+	SourcePath     string
+	FilterNames    []string
+	SourceGoModule *gomodfinder.ModFile
+}
+
+func ParseInterfacesFromSource(params ParseInterfacesParams) (*File, error) {
 	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, "demo", src, parser.ParseComments)
+	parsedFile, err := parser.ParseFile(fset, "demo", params.Source, parser.ParseComments)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse file: %w", err)
+		return nil, fmt.Errorf("failed to parse parsedFile: %w", err)
 	}
 
-	pkg := file.Name.String()
+	pkg := params.SourceGoModule.CalcPackageFromAbsPathWithName(parsedFile.Name.String(), filepath.Dir(params.SourcePath))
 
-	imports := make([]GoImport, 0)
+	imports := goimports.NewImportGroupsFromAstImportSpecs(parsedFile.Imports, params.SourceGoModule.File.Module.Mod.Path)
 
 	needInterfacesSet := map[string]bool{}
-	for _, needInterface := range needInterfaces {
+	for _, needInterface := range params.FilterNames {
 		needInterfacesSet[needInterface] = true
 	}
 
 	isNeed := func(interfaceName string) bool {
-		if len(needInterfaces) == 0 {
+		if len(params.FilterNames) == 0 {
 			return true
 		}
 
 		return needInterfacesSet[interfaceName]
 	}
 
-	for _, spec := range file.Imports {
-		imp := GoImport{
-			Path: strings.Trim(spec.Path.Value, `"`),
-		}
-
-		pathParts := strings.Split(imp.Path, "/")
-		imp.ShortName = pathParts[len(pathParts)-1]
-
-		if spec.Name != nil {
-			imp.Alias = spec.Name.Name
-		}
-
-		imports = append(imports, imp)
+	file := &File{
+		Imports:    imports,
+		Interfaces: make([]*GoInterface, 0),
 	}
 
-	interfaces := make([]*GoInterface, 0)
+	importsShortnameMap := gds.NewMap[string, goimports.GoImport]()
+	for _, goImports := range imports.SortedImports() {
+		for _, goImport := range goImports {
+			if goImport.Alias != "" {
+				importsShortnameMap.Set(goImport.Alias, goImport)
+			} else {
+				importsShortnameMap.Set(goImport.Package.LastName, goImport)
+			}
+		}
+	}
 
 	var inspectErr error
 
-	ast.Inspect(file, func(x ast.Node) bool {
+	ast.Inspect(parsedFile, func(x ast.Node) bool {
 		spec, ok := x.(*ast.TypeSpec)
 		if !ok {
 			return true
@@ -76,28 +84,34 @@ func ParseInterfacesFromSource(src []byte, needInterfaces []string) ([]*GoInterf
 		}
 
 		goInterface := &GoInterface{
-			Name:         ds.NewString(spec.Name.Name),
-			Imports:      imports,
-			Package:      pkg,
-			Methods:      make([]*GoMethod, 0),
-			UsedPackages: ds.NewSet[string](),
+			Name:    ds.NewString(spec.Name.Name),
+			Imports: goimports.NewImportGroups(params.SourceGoModule.Module.Mod.Path),
+			Package: pkg,
+			Methods: make([]*GoMethod, 0),
 		}
 
 		for _, method := range it.Methods.List {
-			goMethod, goMethodErr := ParseMethodFromField(method)
+			goMethod, goMethodErr := ParseMethodFromField(method, pkg, importsShortnameMap, params.SourceGoModule.Module.Mod.Path)
 			if goMethodErr != nil {
 				inspectErr = fmt.Errorf("failed to parse method for interface %q: %w", goInterface.Name, goMethodErr)
 				return false
 			}
 
 			goInterface.Methods = append(goInterface.Methods, goMethod)
-			goInterface.UsedPackages.Merge(goMethod.UsedPackages)
 		}
 
-		interfaces = append(interfaces, goInterface)
+		for _, method := range goInterface.Methods {
+			for _, impGroups := range method.Imports.SortedImports() {
+				for _, imp := range impGroups {
+					goInterface.Imports.Add(imp.Alias, imp.Package.Path)
+				}
+			}
+		}
+
+		file.Interfaces = append(file.Interfaces, goInterface)
 
 		return false
 	})
 
-	return interfaces, inspectErr
+	return file, inspectErr
 }

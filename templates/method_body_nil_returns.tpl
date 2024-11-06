@@ -1,2 +1,1 @@
-{{ $method := .Method }}{{ if .Method.Results.HasValueThroughAnyArg }}    var anyArg any
-{{end}}    return {{ range $index, $result := $method.Results.List }}{{ .Type.Value }}{{ if (isLast $index $method.Results.List) }}{{ else }}, {{ end }}{{ end }}
+{{ $method := .Method }}{{ $typ := .Type }}    return {{ range $index, $result := $method.Results.List }}{{ .Type.ValueFor $typ.Package }}{{ if (isLast $index $method.Results.List) }}{{ else }}, {{ end }}{{ end }}

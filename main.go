@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/gomodfinder"
 	"github.com/artarts36/gostub/internal/cmd"
 	"github.com/artarts36/gostub/internal/renderer"
 	cli "github.com/artarts36/singlecli"
+	"log/slog"
+	"path/filepath"
 	"strings"
 )
 
@@ -119,6 +122,20 @@ func run(ctx *cli.Context) error {
 		}
 	}
 
+	sourceGoModule, err := findGoModule(filepath.Dir(ctx.GetArg("source")))
+	if err != nil {
+		return fmt.Errorf("failed to find source go.mod file: %w", err)
+	}
+
+	slog.InfoContext(ctx.Context, "[main] source go.mod found", slog.String("go_mod", sourceGoModule.Path))
+
+	targetGoModule, err := findCurrentGoModule()
+	if err != nil {
+		return fmt.Errorf("failed to find current go.mod file: %w", err)
+	}
+
+	slog.InfoContext(ctx.Context, "[main] target go.mod found", slog.String("go_mod", targetGoModule.Path))
+
 	return command.Run(ctx.Context, &cmd.Params{
 		Source: ctx.GetArg("source"),
 
@@ -138,5 +155,22 @@ func run(ctx *cli.Context) error {
 		Out:        ctx.Opts["out"],
 		Interfaces: interfaces,
 		SkipExists: ctx.HasOpt("skip-exists"),
+
+		SourceGoModule: sourceGoModule,
+		TargetGoModule: targetGoModule,
 	})
+}
+
+func findCurrentGoModule() (*gomodfinder.ModFile, error) {
+	return findGoModule("./")
+}
+
+func findGoModule(dir string) (*gomodfinder.ModFile, error) {
+	const findGoModLevels = 10
+
+	goMod, err := gomodfinder.Find(dir, findGoModLevels)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find go.mod file: %w", err)
+	}
+	return goMod, nil
 }
