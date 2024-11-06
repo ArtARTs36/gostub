@@ -2,6 +2,7 @@ package stub
 
 import (
 	"fmt"
+	"github.com/artarts36/goimports"
 	"github.com/artarts36/gomodfinder"
 	"github.com/artarts36/gostub/internal/golang"
 	"github.com/artarts36/gostub/internal/renderer"
@@ -60,6 +61,7 @@ func (c *Collector) Collect(params *CollectParams, nameGenerator *renderer.NameG
 		stub := &Stub{
 			Filename:   filename,
 			Package:    types[0].Package,
+			Imports:    goimports.NewImportGroups(""),
 			Types:      types,
 			GenMethods: false,
 			GenTypes:   true,
@@ -110,30 +112,10 @@ func (c *Collector) collectPerType(
 			return nil, stfErr
 		}
 
-		imports := make([]golang.GoImport, 0)
-		if !params.MethodPerFile && typ.Interface.UsedPackages.Valid() {
-			importsMap := map[string]golang.GoImport{}
-			for _, goImport := range typ.Imports {
-				if goImport.Alias != "" {
-					importsMap[goImport.Alias] = goImport
-				}
-
-				if goImport.ShortName != "" {
-					importsMap[goImport.ShortName] = goImport
-				}
-			}
-
-			for _, usedPackage := range typ.Interface.UsedPackages.List() {
-				if imp, ok := importsMap[usedPackage]; ok {
-					imports = append(imports, imp)
-				}
-			}
-		}
-
 		stub := &Stub{
 			Filename: stubTypeFilename,
 			Package:  typ.Package,
-			Imports:  imports,
+			Imports:  typ.Interface.Imports,
 			Types: []golang.Type{
 				typ,
 			},
@@ -197,32 +179,12 @@ func (c *Collector) collectMethodStubs(
 				method,
 			}
 
-			imports := make([]golang.GoImport, 0)
-			if method.UsedPackages.Valid() {
-				importsMap := map[string]golang.GoImport{}
-				for _, goImport := range typ.Imports {
-					if goImport.Alias != "" {
-						importsMap[goImport.Alias] = goImport
-					}
-
-					if goImport.ShortName != "" {
-						importsMap[goImport.ShortName] = goImport
-					}
-				}
-
-				for _, usedPackage := range method.UsedPackages.List() {
-					if imp, ok := importsMap[usedPackage]; ok {
-						imports = append(imports, imp)
-					}
-				}
-			}
+			imports := method.Imports
 
 			pkg := typ.Package
 			if params.TargetPackage != nil {
 				pkg = params.TargetPackage
-				imports = append(imports, golang.GoImport{
-					Path: typ.Interface.Package.FullName(),
-				})
+				imports.AddCurrent("", typ.Interface.Package.FullName())
 			}
 
 			stub := &Stub{

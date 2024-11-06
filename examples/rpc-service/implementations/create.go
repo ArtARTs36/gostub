@@ -2,10 +2,11 @@ package implementations
 
 import (
 	"context"
-	"github.com/artarts36/myproject/contracts"
 	"net/http"
+
+	"github.com/artarts36/myproject/contracts"
 )
 
 func (s *StubUserService) Create(ctx context.Context, r *http.Request) (*contracts.Response, error) {
-	panic("method StubUserService.Create not implemented")
+	return any(0).(*contracts.Response), errors.New("is not real method Create")
 }

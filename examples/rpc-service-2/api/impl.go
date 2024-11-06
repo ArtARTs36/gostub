@@ -13,11 +13,9 @@ func NewStubUserService() *StubUserService {
 }
 
 func (s *StubUserService) List(ctx context.Context, r *http.Request) (*Response, error) {
-	var anyArg any
-	return anyArg.(*Response), errors.New("is not real method List")
+	panic("method StubUserService.List not implemented")
 }
 
 func (s *StubUserService) Create(ctx context.Context, r *http.Request) (*Response, error) {
-	var anyArg any
-	return anyArg.(*Response), errors.New("is not real method Create")
+	panic("method StubUserService.Create not implemented")
 }

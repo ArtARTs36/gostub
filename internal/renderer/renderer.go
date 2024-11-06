@@ -49,6 +49,10 @@ func NewRenderer() (*Renderer, error) {
 			return index < reflect.ValueOf(arr).Len()-1
 		},
 		"noEmpty": func(item interface{}) bool {
+			if item == nil {
+				return false
+			}
+
 			switch v := item.(type) {
 			case interface{ Len() int }:
 				return v.Len() > 0

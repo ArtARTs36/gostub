@@ -1,8 +1,8 @@
 {{ $methodBodyTpl := .Stub.MethodBodyTpl }}{{ $types := .Stub.Types }}package {{ .Stub.Package.Name }}{{ if noEmpty .Stub.Imports }}
 
-import ({{ $imports := .Stub.Imports }}{{ range $importIndex, $import := .Stub.Imports.SortedImports }}
-    {{ raw $import.String }}{{ if (isLast $importIndex $imports) }}
-{{ end }}{{ end }}){{ end }}{{ if .Stub.GenTypes }}
+import ({{ $imports := .Stub.Imports.SortedImports }}{{ range $importGroupIndex, $importGroup := $imports }}{{ range $importIndex, $import := $importGroup }}
+    {{ raw $import.GoString }}{{ if (isLast $importIndex $importGroup) }}
+{{ end }}{{ end }}{{ end }}){{ end }}{{ if .Stub.GenTypes }}
 {{ range $typIndex, $typ := $types }}
 type {{ .Name }} struct {
 

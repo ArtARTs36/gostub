@@ -1,6 +1,7 @@
 package stub
 
 import (
+	"github.com/artarts36/goimports"
 	"github.com/artarts36/gomodfinder"
 	"github.com/artarts36/gostub/internal/golang"
 )
@@ -8,7 +9,7 @@ import (
 type Stub struct {
 	Filename string
 	Package  *gomodfinder.Package
-	Imports  []golang.GoImport
+	Imports  *goimports.ImportGroups
 	Types    []golang.Type
 
 	GenMethods    bool

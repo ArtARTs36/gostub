@@ -1,10 +1,13 @@
 package golang
 
-import "github.com/artarts36/gomodfinder"
+import (
+	"github.com/artarts36/goimports"
+	"github.com/artarts36/gomodfinder"
+)
 
 type Type struct {
 	Name     string
-	Imports  []GoImport
+	Imports  *goimports.ImportGroups
 	Package  *gomodfinder.Package
 	Receiver string
 	Methods  []*GoMethod

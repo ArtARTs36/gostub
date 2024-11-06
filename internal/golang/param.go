@@ -12,7 +12,6 @@ import (
 type GoParameters struct {
 	List                  []GoParameter
 	HasValueThroughAnyArg bool
-	UsedPackages          *ds.Set[string]
 }
 
 type GoParameter struct {
@@ -61,10 +60,10 @@ func (t *GoParameterType) calcStubInstantiateExpr(methodName string) {
 		}
 
 		if !t.UsedPackages.Valid() {
-			t.UsedPackages.Add("errors")
-
 			switch t.Name {
 			case TypeError:
+				t.UsedPackages.Add("errors")
+
 				return template.HTML(fmt.Sprintf(`errors.New("is not real method %s")`, methodName)),
 					template.HTML(fmt.Sprintf(`errors.New("is not real method %s")`, methodName))
 			case TypeAny, "interface":
@@ -82,8 +81,8 @@ func (t *GoParameterType) calcStubInstantiateExpr(methodName string) {
 
 		t.ValueThroughVar = true
 
-		return template.HTML(fmt.Sprintf("anyArg.(%s)", t.Name)),
-			template.HTML(fmt.Sprintf("anyArg.(%s)", t.ExternalName))
+		return template.HTML(fmt.Sprintf("any(0).(%s)", t.Name)),
+			template.HTML(fmt.Sprintf("any(0).(%s)", t.ExternalName))
 	}
 
 	t.Value, t.ExternalValue = calc(methodName)

@@ -121,25 +121,25 @@ func (c *Command) collectStubs(src []byte, params *Params, nameGenerator *render
 		return nil, fmt.Errorf("failed to get absoulte source path for source %q: %w", sourceAbsPath, err)
 	}
 
-	interfaces, err := golang.ParseInterfacesFromSource(golang.ParseInterfacesParams{
+	parsedFile, err := golang.ParseInterfacesFromSource(golang.ParseInterfacesParams{
 		Source:         src,
 		SourcePath:     sourceAbsPath,
 		FilterNames:    params.Interfaces,
 		SourceGoModule: params.SourceGoModule,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse go interfaces: %w", err)
+		return nil, fmt.Errorf("failed to parse go file: %w", err)
 	}
 
 	var targetPkg *gomodfinder.Package
 	if params.Package != "" {
 		targetPkg = params.TargetGoModule.Package(params.Package)
 	} else {
-		targetPkg = interfaces[0].Package
+		targetPkg = parsedFile.Interfaces[0].Package
 	}
 
 	return c.stubCollector.Collect(&st.CollectParams{
-		GoInterfaces: interfaces,
+		GoInterfaces: parsedFile.Interfaces,
 
 		TypePerFile:   params.TypePerFile,
 		MethodPerFile: params.MethodPerFile,
