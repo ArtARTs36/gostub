@@ -5,7 +5,7 @@ go 1.22.8
 require (
 	github.com/artarts36/gds v0.1.3
 	github.com/artarts36/goimports v0.1.3
-	github.com/artarts36/gomodfinder v0.0.0-20241103230927-68b64e15e35e
+	github.com/artarts36/gomodfinder v0.0.0-20241113204344-1a91d5119154
 	github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745
 	github.com/fatih/camelcase v1.0.0
 	github.com/iancoleman/strcase v0.3.0
